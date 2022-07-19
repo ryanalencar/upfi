@@ -1,5 +1,5 @@
 import { Button, Box } from '@chakra-ui/react';
-import { useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useInfiniteQuery } from 'react-query';
 
 import { Header } from '../components/Header';
@@ -9,6 +9,12 @@ import { Loading } from '../components/Loading';
 import { Error } from '../components/Error';
 
 export default function Home(): JSX.Element {
+  const fetchImages = useCallback(
+    ({ pageParam = 0 }) =>
+      api.get(`http://localhost:3000/api/images?after=${pageParam}`),
+    []
+  );
+
   const {
     data,
     isLoading,
@@ -16,20 +22,17 @@ export default function Home(): JSX.Element {
     isFetchingNextPage,
     fetchNextPage,
     hasNextPage,
-  } = useInfiniteQuery(
-    'images',
-    // TODO AXIOS REQUEST WITH PARAM
-    ,
-    // TODO GET AND RETURN NEXT PAGE PARAM
+  } = useInfiniteQuery('images', fetchImages, {
+    getNextPageParam: lastPage => lastPage.data.after ?? null,
+  });
+
+  const formattedData = useMemo(
+    () => data?.pages.flatMap(page => page.data),
+    [data]
   );
 
-  const formattedData = useMemo(() => {
-    // TODO FORMAT AND FLAT DATA ARRAY
-  }, [data]);
-
-  // TODO RENDER LOADING SCREEN
-
-  // TODO RENDER ERROR SCREEN
+  if (isLoading) return <Loading />;
+  if (isError) return <Error />;
 
   return (
     <>
@@ -37,7 +40,14 @@ export default function Home(): JSX.Element {
 
       <Box maxW={1120} px={20} mx="auto" my={20}>
         <CardList cards={formattedData} />
-        {/* TODO RENDER LOAD MORE BUTTON IF DATA HAS NEXT PAGE */}
+        {hasNextPage && (
+          <Button
+            isLoading={isFetchingNextPage}
+            onClick={() => fetchNextPage()}
+          >
+            {isFetchingNextPage ? 'Carregar mais' : 'Carregando...'}
+          </Button>
+        )}
       </Box>
     </>
   );
