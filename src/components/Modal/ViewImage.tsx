@@ -20,9 +20,15 @@ export function ModalViewImage({
   imgUrl,
 }: ModalViewImageProps): JSX.Element {
   return (
-    <Modal blockScrollOnMount isCentered isOpen={isOpen} onClose={onClose}>
+    <Modal
+      blockScrollOnMount
+      isCentered
+      isOpen={isOpen}
+      onClose={onClose}
+      size="xl"
+    >
       <ModalOverlay />
-      <ModalContent bgColor="gray.900">
+      <ModalContent bgColor="pGray.900">
         <ModalBody p={0}>
           <Image w="100%" h="100%" src={imgUrl} />
         </ModalBody>
